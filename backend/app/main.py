@@ -5,6 +5,7 @@ from app.collection.router import router as collection_router
 from app.core.config import get_settings
 from app.db.base import Base, import_models
 from app.db.session import build_engine, build_session_factory
+from app.generation.router import router as generation_router
 from app.projects.router import router as projects_router
 
 
@@ -19,6 +20,7 @@ def create_app(database_url: str | None = None) -> FastAPI:
     app.include_router(projects_router)
     app.include_router(collection_router)
     app.include_router(analysis_router)
+    app.include_router(generation_router)
 
     @app.get("/api/health")
     def health() -> dict[str, str]:

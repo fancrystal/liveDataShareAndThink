@@ -48,3 +48,10 @@ def imported_project(client: TestClient, project: dict) -> dict:
     assert response.status_code == 201
     return project
 
+
+@pytest.fixture
+def analyzed_project(client: TestClient, imported_project: dict) -> dict:
+    response = client.post(f"/api/projects/{imported_project['id']}/analysis/rank")
+    assert response.status_code == 201
+    return {**imported_project, "insight_id": response.json()["insight"]["id"]}
+
