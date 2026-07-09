@@ -41,3 +41,10 @@ def project(client: TestClient, project_payload: dict) -> dict:
     assert response.status_code == 201
     return response.json()
 
+
+@pytest.fixture
+def imported_project(client: TestClient, project: dict) -> dict:
+    response = client.post(f"/api/projects/{project['id']}/collections/fixture")
+    assert response.status_code == 201
+    return project
+

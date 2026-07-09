@@ -6,8 +6,10 @@ class Base(DeclarativeBase):
 
 
 def import_models() -> None:
+    from app.analysis import models as analysis_models
     from app.collection import models as collection_models
     from app.projects import models as project_models
 
+    del analysis_models
     del collection_models
     del project_models
