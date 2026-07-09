@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 
+from app.collection.router import router as collection_router
 from app.core.config import get_settings
 from app.db.base import Base, import_models
 from app.db.session import build_engine, build_session_factory
@@ -15,6 +16,7 @@ def create_app(database_url: str | None = None) -> FastAPI:
     app.state.engine = engine
     app.state.session_factory = build_session_factory(engine)
     app.include_router(projects_router)
+    app.include_router(collection_router)
 
     @app.get("/api/health")
     def health() -> dict[str, str]:

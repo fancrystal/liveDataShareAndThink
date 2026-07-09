@@ -1,0 +1,65 @@
+{
+  "source": "fixture",
+  "query": "敏感肌",
+  "collected_at": "2026-07-09T10:00:00+08:00",
+  "notes": [
+    {
+      "platform_note_id": "fixture-note-1",
+      "url": "https://www.xiaohongshu.com/explore/fixture-note-1",
+      "author": {
+        "platform_author_id": "author-1",
+        "nickname": "阿宁护肤",
+        "followers": 1200
+      },
+      "title": "敏感肌别再盲买了",
+      "content": "先看屏障状态，再选清洁和保湿。",
+      "content_type": "image",
+      "published_at": "2026-07-08T10:00:00+08:00",
+      "metrics": {
+        "likes": 860,
+        "favorites": 620,
+        "comments": 143,
+        "shares": 31
+      }
+    },
+    {
+      "platform_note_id": "fixture-note-2",
+      "url": "https://www.xiaohongshu.com/explore/fixture-note-2",
+      "author": {
+        "platform_author_id": "author-2",
+        "nickname": "成分小周",
+        "followers": 25000
+      },
+      "title": "夏天修护清单",
+      "content": "三个步骤建立日常修护流程。",
+      "content_type": "image",
+      "published_at": "2026-07-05T12:00:00+08:00",
+      "metrics": {
+        "likes": 1900,
+        "favorites": 1100,
+        "comments": 96,
+        "shares": 42
+      }
+    },
+    {
+      "platform_note_id": "fixture-note-3",
+      "url": "https://www.xiaohongshu.com/explore/fixture-note-3",
+      "author": {
+        "platform_author_id": "author-3",
+        "nickname": "真实试用员",
+        "followers": 600
+      },
+      "title": "泛红时我只做这两件事",
+      "content": "停止叠加产品，记录刺激来源。",
+      "content_type": "video",
+      "published_at": "2026-07-09T08:00:00+08:00",
+      "metrics": {
+        "likes": 420,
+        "favorites": 180,
+        "comments": 88,
+        "shares": 15
+      }
+    }
+  ]
+}
+
