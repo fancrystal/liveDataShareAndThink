@@ -2,6 +2,8 @@ from fastapi import APIRouter, Depends, status
 from sqlalchemy.orm import Session
 
 from app.db.session import get_session
+from app.core.config import get_settings
+from app.generation.factory import build_content_generator
 from app.generation.schemas import (
     DraftExport,
     DraftRead,
@@ -11,13 +13,12 @@ from app.generation.schemas import (
     TopicRead,
 )
 from app.generation.service import GenerationService
-from app.generation.template_adapter import TemplateGenerator
 
 router = APIRouter(tags=["generation"])
 
 
 def service(session: Session) -> GenerationService:
-    return GenerationService(session, TemplateGenerator())
+    return GenerationService(session, build_content_generator(get_settings()))
 
 
 @router.post("/api/projects/{project_id}/topics", response_model=TopicRead, status_code=status.HTTP_201_CREATED)
@@ -46,4 +47,3 @@ def review_draft(
 @router.get("/api/draft-versions/{version_id}/export", response_model=DraftExport)
 def export_draft(version_id: str, session: Session = Depends(get_session)) -> DraftExport:
     return service(session).export(version_id)
-

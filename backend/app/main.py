@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
 from app.analysis.router import router as analysis_router
 from app.collection.router import router as collection_router
@@ -11,6 +12,12 @@ from app.projects.router import router as projects_router
 
 def create_app(database_url: str | None = None) -> FastAPI:
     app = FastAPI(title="LiveDataShareAndThink")
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"],
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
     settings = get_settings()
     engine = build_engine(database_url or settings.database_url)
     import_models()

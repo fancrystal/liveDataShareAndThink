@@ -6,5 +6,5 @@ __pycache__/
 *.db
 node_modules/
 frontend/dist/
+*.tsbuildinfo
 .worktrees/
-
