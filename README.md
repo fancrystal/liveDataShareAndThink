@@ -65,3 +65,25 @@ Key 由后端读取，浏览器端看不到；`.env` 已被 Git 忽略。未填�
 - [第一期设计](docs/superpowers/specs/2026-07-09-xiaohongshu-content-growth-design.md)
 - [固定样本闭环实施计划](docs/superpowers/plans/2026-07-09-fixed-sample-vertical-slice.md)
 - [开源项目调研](docs/research/xiaohongshu-open-source-landscape.md)
+
+## 真实小红书关键词采集（本机可选）
+
+固定样本流程不需要小红书登录。需要采集真实关键词样本时，请在本机准备：
+
+```powershell
+# Node.js 需要 22 或更高版本
+npm.cmd install -g @lucasygu/redbook
+
+# 在 Chrome 登录 https://www.xiaohongshu.com 后验证登录态
+redbook.cmd whoami
+```
+
+Windows 的 PowerShell 可能会禁止执行 npm 生成的 `redbook.ps1`；此时请使用 `redbook.cmd`。如果登录检查提示没有 `a1` Cookie，请先确认 Chrome 已登录并能正常看到小红书首页；部分 Windows Chrome 版本还需要完全关闭 Chrome 后再重试。
+
+随后调用只读采集接口：
+
+```text
+POST /api/projects/{project_id}/collections/redbook?keyword=敏感肌
+```
+
+服务端只启动本机 `redbook search` 并保存标准化的公开笔记、作者和指标快照；不会读取、上传或写入 Cookie，也不会执行发布、点赞、评论或收藏。未安装 CLI、登录过期、验证码或风控会返回 HTTP 422 和可执行提示。
