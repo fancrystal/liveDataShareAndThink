@@ -9,7 +9,7 @@ Complete the Phase 1 content-acquisition loop for one local user: search Xiaohon
 ## Scope and safety boundary
 
 - This is a read-only, user-initiated keyword collection action. It never publishes, likes, comments, follows, or saves content.
-- The application does not read, persist, expose, or commit Cookie values. It reuses the local `xhs-cli` session only to open a browser page.
+- The application does not persist, expose, log, or commit Cookie values. A local-only browser gateway reads the existing `xhs-cli` session in memory solely to open a browser page.
 - The collector reads only public search-result card fields that are visible to the signed-in user: note URL and ID, title, visible description, author display name and ID when available, content type, and visible engagement counts.
 - Phase 1 does not collect note detail pages, followers, comments, livestream data, background jobs, proxy rotation, CAPTCHA bypassing, or automatic retries.
 
