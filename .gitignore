@@ -8,3 +8,8 @@ node_modules/
 frontend/dist/
 *.tsbuildinfo
 .worktrees/
+.superpowers/
+xhs-login-qr.png
+.tmp-xhs-*
+camoufox-*.zip
+showcase/xhs-search-preview.png

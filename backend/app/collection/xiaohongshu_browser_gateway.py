@@ -37,13 +37,13 @@ class XiaohongshuBrowserGateway:
           author_name: (authorLink?.innerText || text.at(-1) || '').trim(),
           content_type: card?.querySelector('video') ? 'video' : 'image',
           published_at: time,
-          likes: '',
+          likes: (card?.querySelector('.like-wrapper .count')?.innerText || '').trim(),
           favorites: '',
           comments: '',
           shares: '',
         };
       })
-      .filter((card) => card.note_id && card.url && card.title && card.author_id && card.author_name && card.published_at)
+      .filter((card) => card.note_id && card.url && card.title && card.author_id && card.author_name)
       .slice(0, 20)"""
 
     def search(self, keyword: str) -> list[PublicSearchCard]:
@@ -54,7 +54,7 @@ class XiaohongshuBrowserGateway:
                     wait_until="domcontentloaded",
                     timeout=20_000,
                 )
-                page.wait_for_selector('a[href*="/explore/"]', timeout=12_000)
+                page.wait_for_selector('a[href*="/explore/"]', state="attached", timeout=12_000)
                 return self.extract_cards(page)
         except XiaohongshuCollectionError:
             raise
@@ -76,7 +76,7 @@ class XiaohongshuBrowserGateway:
                         author_id=cls._required(item, "author_id"),
                         author_name=cls._required(item, "author_name"),
                         content_type=str(item.get("content_type") or "image"),
-                        published_at=cls._required(item, "published_at"),
+                        published_at=cls._optional(item, "published_at"),
                         likes=cls._optional(item, "likes"),
                         favorites=cls._optional(item, "favorites"),
                         comments=cls._optional(item, "comments"),

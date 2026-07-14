@@ -1,4 +1,5 @@
 from datetime import UTC, datetime
+from contextlib import contextmanager
 
 import pytest
 
@@ -62,6 +63,27 @@ def test_search_notes_rejects_blank_keyword() -> None:
         adapter.search_notes("   ")
 
 
+def test_search_notes_keeps_missing_published_time_unknown() -> None:
+    card = PublicSearchCard(
+        note_id="note-without-time",
+        url="https://www.xiaohongshu.com/explore/note-without-time",
+        title="Visible search card",
+        content="",
+        author_id="author-1",
+        author_name="Creator",
+        content_type="image",
+        published_at=None,
+    )
+
+    class Gateway:
+        def search(self, keyword: str) -> list[PublicSearchCard]:
+            return [card]
+
+    result = XiaohongshuDomAdapter(Gateway()).search_notes("skincare")
+
+    assert result.notes[0].published_at is None
+
+
 def test_parse_visible_count_returns_none_for_unknown_text() -> None:
     assert parse_visible_count("high engagement") is None
 
@@ -92,3 +114,31 @@ def test_extract_cards_returns_public_fields_only() -> None:
 
     assert cards[0].note_id == "note-1"
     assert cards[0].likes == "1.2w"
+
+
+def test_search_waits_for_attached_result_links() -> None:
+    from app.collection.xiaohongshu_browser_gateway import XiaohongshuBrowserGateway
+
+    class SearchPage(FakePage):
+        def __init__(self) -> None:
+            super().__init__([])
+            self.wait_state: str | None = None
+
+        def goto(self, *_args: object, **_kwargs: object) -> None:
+            return None
+
+        def wait_for_selector(self, _selector: str, **kwargs: object) -> None:
+            self.wait_state = kwargs.get("state") if isinstance(kwargs.get("state"), str) else None
+
+    class Gateway(XiaohongshuBrowserGateway):
+        def __init__(self, page: SearchPage) -> None:
+            self.page = page
+
+        @contextmanager
+        def _open_signed_in_page(self):
+            yield self.page
+
+    page = SearchPage()
+    Gateway(page).search("skincare")
+
+    assert page.wait_state == "attached"

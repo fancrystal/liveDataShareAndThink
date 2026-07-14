@@ -1,10 +1,12 @@
 import { useState } from "react";
 
-import type { Api, CollectionSummary, Draft, Project, RankingReport } from "./api/types";
+import type { Api, CollectionSummary, Draft, Note, Project, RankingReport } from "./api/types";
 import { DraftWorkbench } from "./components/DraftWorkbench";
 import { ProjectForm } from "./components/ProjectForm";
 import { RankingTable } from "./components/RankingTable";
+import { NotesPreview } from "./components/NotesPreview";
 import { SampleImport } from "./components/SampleImport";
+import { XiaohongshuImport } from "./components/XiaohongshuImport";
 import "./styles.css";
 
 export function App({ api }: { api: Api }) {
@@ -12,6 +14,7 @@ export function App({ api }: { api: Api }) {
   const [summary, setSummary] = useState<CollectionSummary | null>(null);
   const [report, setReport] = useState<RankingReport | null>(null);
   const [drafts, setDrafts] = useState<Draft[]>([]);
+  const [notes, setNotes] = useState<Note[]>([]);
   const [error, setError] = useState("");
 
   const guard = async (operation: () => Promise<void>) => {
@@ -48,6 +51,17 @@ export function App({ api }: { api: Api }) {
             if (project) setSummary(await api.importFixture(project.id));
           })}
         />
+        <XiaohongshuImport
+          enabled={Boolean(project)}
+          summary={summary}
+          onImport={async (keyword) => guard(async () => {
+            if (project) {
+              setSummary(await api.importXiaohongshu(project.id, keyword));
+              setNotes(await api.listNotes(project.id));
+            }
+          })}
+        />
+        <NotesPreview notes={notes} />
         <section className="panel action-panel">
           <div className="eyebrow">运行分析</div>
           <h2>从数据到判断</h2>
@@ -76,4 +90,3 @@ export function App({ api }: { api: Api }) {
     </main>
   );
 }
-

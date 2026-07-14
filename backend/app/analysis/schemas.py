@@ -4,7 +4,7 @@ from pydantic import BaseModel
 class ScoreRead(BaseModel):
     total: float
     engagement: float
-    velocity: float
+    velocity: float | None
     cohort_relative: float
     author_efficiency: float | None
     confidence: str
@@ -38,4 +38,3 @@ class InsightRead(BaseModel):
 class RankingReport(BaseModel):
     rankings: list[RankingRead]
     insight: InsightRead
-

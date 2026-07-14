@@ -18,10 +18,30 @@ export type CollectionSummary = {
   notes_created: number;
   metric_snapshots_created: number;
 };
+export type MetricSnapshot = {
+  id: string;
+  collected_at: string;
+  likes: number | null;
+  favorites: number | null;
+  comments: number | null;
+  shares: number | null;
+  followers: number | null;
+};
+export type Note = {
+  id: string;
+  title: string;
+  url: string;
+  content: string;
+  content_type: string;
+  published_at: string | null;
+  source: { adapter: string };
+  author: { id: string; nickname: string; followers: number | null };
+  metric_snapshots: MetricSnapshot[];
+};
 export type Score = {
   total: number;
   engagement: number;
-  velocity: number;
+  velocity: number | null;
   cohort_relative: number;
   author_efficiency: number | null;
   confidence: string;
@@ -55,8 +75,9 @@ export type Draft = {
 export interface Api {
   createProject(input: ProjectCreate): Promise<Project>;
   importFixture(projectId: string): Promise<CollectionSummary>;
+  importXiaohongshu(projectId: string, keyword: string): Promise<CollectionSummary>;
+  listNotes(projectId: string): Promise<Note[]>;
   rankNotes(projectId: string): Promise<RankingReport>;
   createTopic(projectId: string, input: Record<string, string>): Promise<Topic>;
   generateDrafts(topicId: string): Promise<Draft[]>;
 }
-

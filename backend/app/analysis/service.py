@@ -26,7 +26,7 @@ class AnalysisService:
             published_at = note.published_at
             if collected_at.tzinfo is None:
                 collected_at = collected_at.replace(tzinfo=timezone.utc)
-            if published_at.tzinfo is None:
+            if published_at is not None and published_at.tzinfo is None:
                 published_at = published_at.replace(tzinfo=timezone.utc)
             inputs.append(
                 (
@@ -38,7 +38,11 @@ class AnalysisService:
                         comments=snapshot.comments,
                         shares=snapshot.shares,
                         followers=snapshot.followers,
-                        age_hours=max((collected_at - published_at).total_seconds() / 3600, 1),
+                        age_hours=(
+                            max((collected_at - published_at).total_seconds() / 3600, 1)
+                            if published_at is not None
+                            else None
+                        ),
                     ),
                 )
             )
@@ -104,4 +108,3 @@ class AnalysisService:
                 ],
             },
         }
-

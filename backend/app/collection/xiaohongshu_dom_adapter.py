@@ -21,7 +21,7 @@ class PublicSearchCard:
     author_id: str
     author_name: str
     content_type: str
-    published_at: str
+    published_at: str | None
     likes: str | None = None
     favorites: str | None = None
     comments: str | None = None

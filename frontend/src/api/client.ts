@@ -21,6 +21,12 @@ export const api: Api = {
   importFixture(projectId: string) {
     return request(`/projects/${projectId}/collections/fixture`, { method: "POST" });
   },
+  importXiaohongshu(projectId: string, keyword: string) {
+    return request(`/projects/${projectId}/collections/xiaohongshu?keyword=${encodeURIComponent(keyword)}`, { method: "POST" });
+  },
+  listNotes(projectId: string) {
+    return request(`/projects/${projectId}/notes`);
+  },
   rankNotes(projectId: string) {
     return request(`/projects/${projectId}/analysis/rank`, { method: "POST" });
   },
@@ -31,4 +37,3 @@ export const api: Api = {
     return request(`/topics/${topicId}/drafts/generate`, { method: "POST" });
   }
 };
-

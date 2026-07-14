@@ -1,9 +1,11 @@
-import { render, screen } from "@testing-library/react";
+import { cleanup, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it } from "vitest";
 
 import { App } from "./App";
 import type { Api } from "./api/types";
+
+afterEach(cleanup);
 
 const fakeApi: Api = {
   async createProject(input) {
@@ -16,6 +18,22 @@ const fakeApi: Api = {
   },
   async importFixture() {
     return { run_id: "run-1", status: "succeeded", notes_created: 3, metric_snapshots_created: 3 };
+  },
+  async importXiaohongshu() {
+    return { run_id: "xhs-run", status: "succeeded", notes_created: 4, metric_snapshots_created: 4 };
+  },
+  async listNotes() {
+    return [{
+      id: "note-1",
+      title: "Sensitive skin routine",
+      url: "https://www.xiaohongshu.com/explore/note-1",
+      content: "Start with fewer products.",
+      content_type: "image",
+      published_at: "2026-07-10T08:00:00Z",
+      source: { adapter: "xiaohongshu-dom" },
+      author: { id: "author-1", nickname: "Creator", followers: null },
+      metric_snapshots: [{ id: "metric-1", collected_at: "2026-07-14T08:00:00Z", likes: 12000, favorites: 300, comments: 8, shares: null, followers: null }]
+    }];
   },
   async rankNotes() {
     return {
@@ -73,6 +91,23 @@ const fakeApi: Api = {
 };
 
 describe("content research workbench", () => {
+  async function createProject(user: ReturnType<typeof userEvent.setup>) {
+    await user.type(screen.getByLabelText("项目名称"), "护肤直播增长");
+    await user.click(screen.getByRole("button", { name: "创建项目" }));
+  }
+
+  it("imports a Xiaohongshu keyword before analysis", async () => {
+    const user = userEvent.setup();
+    render(<App api={fakeApi} />);
+
+    await createProject(user);
+    await user.type(screen.getByLabelText("小红书关键词"), "敏感肌");
+    await user.click(screen.getByRole("button", { name: "采集公开搜索结果" }));
+
+    expect(await screen.findByText("已导入 4 条公开笔记")).toBeInTheDocument();
+    expect(await screen.findByText("Sensitive skin routine")).toBeInTheDocument();
+  });
+
   it("runs the fixed-sample workflow", async () => {
     const user = userEvent.setup();
     render(<App api={fakeApi} />);

@@ -35,7 +35,7 @@ class Note(Base):
     title: Mapped[str] = mapped_column(String(240))
     content: Mapped[str] = mapped_column(Text)
     content_type: Mapped[str] = mapped_column(String(32))
-    published_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    published_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     source: Mapped[dict] = mapped_column(JSON)
     raw_data: Mapped[dict] = mapped_column(JSON)
     first_collected_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now)
@@ -74,4 +74,3 @@ class CollectionRun(Base):
     finished_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     notes_created: Mapped[int] = mapped_column(Integer, default=0)
     metric_snapshots_created: Mapped[int] = mapped_column(Integer, default=0)
-

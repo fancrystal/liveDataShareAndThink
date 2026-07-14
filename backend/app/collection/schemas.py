@@ -23,7 +23,7 @@ class CollectedNote(BaseModel):
     title: str
     content: str
     content_type: str
-    published_at: datetime
+    published_at: datetime | None
     metrics: CollectedMetrics
 
 
@@ -67,8 +67,7 @@ class NoteRead(BaseModel):
     title: str
     content: str
     content_type: str
-    published_at: datetime
+    published_at: datetime | None
     source: dict
     author: AuthorRead
     metric_snapshots: list[MetricSnapshotRead]
-

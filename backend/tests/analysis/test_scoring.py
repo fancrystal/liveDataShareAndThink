@@ -40,3 +40,21 @@ def test_missing_followers_reduce_confidence_without_becoming_zero() -> None:
     assert score.confidence == "medium"
     assert score.total > 0
 
+
+def test_missing_published_time_skips_velocity_and_is_low_confidence() -> None:
+    score = score_note(
+        MetricInput(
+            likes=50,
+            favorites=20,
+            comments=5,
+            shares=None,
+            followers=None,
+            age_hours=None,
+        ),
+        cohort_median_engagement=80,
+        cohort_size=3,
+    )
+
+    assert score.velocity is None
+    assert score.confidence == "low"
+    assert score.total > 0
