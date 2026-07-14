@@ -2,6 +2,7 @@ from datetime import UTC, datetime
 
 import app.collection.router as collection_router
 from app.collection.schemas import CollectedAuthor, CollectedMetrics, CollectedNote, FixturePayload
+from app.collection.xiaohongshu_dom_adapter import XiaohongshuCollectionError
 
 
 class FakeRedbookAdapter:
@@ -29,6 +30,20 @@ class FakeRedbookAdapter:
         )
 
 
+class FakeDomAdapter(FakeRedbookAdapter):
+    def __init__(self, *_args: object) -> None:
+        pass
+
+    @property
+    def name(self) -> str:
+        return "xiaohongshu-dom"
+
+
+class FailingDomAdapter(FakeDomAdapter):
+    def search_notes(self, keyword: str) -> FixturePayload:
+        raise XiaohongshuCollectionError("Local session failed")
+
+
 def test_redbook_import_uses_collection_service(client, project, monkeypatch) -> None:
     monkeypatch.setattr(collection_router, "RedbookAdapter", FakeRedbookAdapter)
 
@@ -40,6 +55,29 @@ def test_redbook_import_uses_collection_service(client, project, monkeypatch) ->
     notes = client.get(f"/api/projects/{project['id']}/notes")
     assert notes.status_code == 200
     assert notes.json()[0]["source"]["adapter"] == "redbook"
+
+
+def test_xiaohongshu_import_uses_collection_service(client, project, monkeypatch) -> None:
+    monkeypatch.setattr(collection_router, "XiaohongshuDomAdapter", FakeDomAdapter)
+
+    response = client.post(f"/api/projects/{project['id']}/collections/xiaohongshu?keyword=sensitive%20skin")
+
+    assert response.status_code == 201
+    assert response.json()["notes_created"] == 1
+
+    notes = client.get(f"/api/projects/{project['id']}/notes")
+    assert notes.status_code == 200
+    assert notes.json()[0]["source"]["adapter"] == "xiaohongshu-dom"
+
+
+def test_xiaohongshu_import_returns_safe_error(client, project, monkeypatch) -> None:
+    monkeypatch.setattr(collection_router, "XiaohongshuDomAdapter", FailingDomAdapter)
+
+    response = client.post(f"/api/projects/{project['id']}/collections/xiaohongshu?keyword=sensitive%20skin")
+
+    assert response.status_code == 422
+    assert response.json() == {"detail": "Local session failed"}
+    assert "cookie" not in response.text.lower()
 
 
 def test_fixture_import_is_idempotent(client, project) -> None:
