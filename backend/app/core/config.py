@@ -12,6 +12,8 @@ class Settings(BaseSettings):
     deepseek_api_key: str | None = None
     deepseek_base_url: str = "https://api.deepseek.com"
     deepseek_model: str = "deepseek-v4-flash"
+    collection_proxy_url: str | None = None
+    collection_proxy_token: str | None = None
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
 

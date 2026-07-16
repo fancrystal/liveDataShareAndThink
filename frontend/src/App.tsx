@@ -54,6 +54,7 @@ export function App({ api }: { api: Api }) {
         <XiaohongshuImport
           enabled={Boolean(project)}
           summary={summary}
+          error={error}
           onImport={async (keyword) => guard(async () => {
             if (project) {
               setSummary(await api.importXiaohongshu(project.id, keyword));

@@ -14,7 +14,12 @@ def create_app(database_url: str | None = None) -> FastAPI:
     app = FastAPI(title="LiveDataShareAndThink")
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"],
+        allow_origins=[
+            "http://localhost:5173",
+            "http://127.0.0.1:5173",
+            "http://localhost:17777",
+            "http://127.0.0.1:17777",
+        ],
         allow_methods=["*"],
         allow_headers=["*"],
     )

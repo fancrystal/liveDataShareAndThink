@@ -108,6 +108,28 @@ describe("content research workbench", () => {
     expect(await screen.findByText("Sensitive skin routine")).toBeInTheDocument();
   });
 
+  it("shows collection progress and prevents a duplicate Xiaohongshu import", async () => {
+    let finishImport: (() => void) | undefined;
+    const api: Api = {
+      ...fakeApi,
+      importXiaohongshu: () => new Promise((resolve) => {
+        finishImport = () => resolve({ run_id: "xhs-run", status: "succeeded", notes_created: 4, metric_snapshots_created: 4 });
+      })
+    };
+    const user = userEvent.setup();
+    render(<App api={api} />);
+
+    await createProject(user);
+    await user.type(screen.getByLabelText("小红书关键词"), "敏感肌");
+    const button = screen.getByRole("button", { name: "采集公开搜索结果" });
+    await user.click(button);
+
+    expect(screen.getByRole("button", { name: "采集中…" })).toBeDisabled();
+    expect(screen.getByLabelText("小红书关键词")).toBeDisabled();
+    finishImport?.();
+    expect(await screen.findByText("已导入 4 条公开笔记")).toBeInTheDocument();
+  });
+
   it("runs the fixed-sample workflow", async () => {
     const user = userEvent.setup();
     render(<App api={fakeApi} />);

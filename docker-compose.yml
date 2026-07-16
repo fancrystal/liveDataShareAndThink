@@ -1,0 +1,44 @@
+services:
+  db:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: live_data
+      POSTGRES_USER: app
+      POSTGRES_PASSWORD: app
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U app -d live_data"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  api:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    environment:
+      DATABASE_URL: postgresql+psycopg://app:app@db:5432/live_data
+      GENERATION_PROVIDER: template
+      FIXTURE_PATH: tests/fixtures/xhs_notes.json
+      COLLECTION_PROXY_URL: http://host.docker.internal:17779
+      COLLECTION_PROXY_TOKEN: ${COLLECTION_PROXY_TOKEN:-}
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "17778:8000"
+
+  web:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+      args:
+        VITE_API_URL: http://localhost:17778/api
+    depends_on:
+      - api
+    ports:
+      - "17777:80"
+
+volumes:
+  postgres_data:

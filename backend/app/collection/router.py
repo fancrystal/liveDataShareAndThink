@@ -2,8 +2,8 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.collection.fixture_adapter import FixtureAdapter
+from app.collection.gateway_factory import build_xiaohongshu_gateway
 from app.collection.redbook_adapter import RedbookAdapter, RedbookAdapterError
-from app.collection.xiaohongshu_browser_gateway import XiaohongshuBrowserGateway
 from app.collection.xiaohongshu_dom_adapter import XiaohongshuCollectionError, XiaohongshuDomAdapter
 from app.collection.schemas import CollectionSummary, NoteRead
 from app.collection.service import CollectionService
@@ -22,7 +22,7 @@ def redbook_service(session: Session) -> CollectionService:
 
 
 def xiaohongshu_service(session: Session) -> CollectionService:
-    return CollectionService(session, XiaohongshuDomAdapter(XiaohongshuBrowserGateway()))
+    return CollectionService(session, XiaohongshuDomAdapter(build_xiaohongshu_gateway(get_settings())))
 
 
 @router.post("/collections/fixture", response_model=CollectionSummary, status_code=status.HTTP_201_CREATED)

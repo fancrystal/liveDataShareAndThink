@@ -29,3 +29,18 @@ def test_local_web_origin_is_allowed() -> None:
 
     assert response.status_code == 200
     assert response.headers["access-control-allow-origin"] == "http://localhost:5173"
+
+
+def test_docker_web_origin_is_allowed() -> None:
+    client = TestClient(create_app())
+
+    response = client.options(
+        "/api/health",
+        headers={
+            "Origin": "http://localhost:17777",
+            "Access-Control-Request-Method": "GET",
+        },
+    )
+
+    assert response.status_code == 200
+    assert response.headers["access-control-allow-origin"] == "http://localhost:17777"
