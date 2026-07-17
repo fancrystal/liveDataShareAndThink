@@ -28,6 +28,12 @@ export type CollectionRun = {
   notes_created: number;
   metric_snapshots_created: number;
 };
+export type VerticalResearch = {
+  topic: string;
+  collection_date: string;
+  top_candidates: { title: string; url: string; score: number }[];
+  ai_report: { today_summary: string; hot_reasons: string[]; replication_checklist: string[]; disclosure: string };
+};
 export type MetricSnapshot = {
   id: string;
   collected_at: string;
@@ -100,4 +106,5 @@ export interface Api {
   rankNotes(projectId: string): Promise<RankingReport>;
   createTopic(projectId: string, input: Record<string, string>): Promise<Topic>;
   generateDrafts(topicId: string): Promise<Draft[]>;
+  runVerticalResearch(projectId: string, topic: string): Promise<VerticalResearch>;
 }

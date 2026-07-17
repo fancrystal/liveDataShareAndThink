@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-import type { Api, CollectionRun, CollectionSummary, Draft, Note, Project, RankingReport } from "./api/types";
+import type { Api, CollectionRun, CollectionSummary, Draft, Note, Project, RankingReport, VerticalResearch as VerticalResearchReport } from "./api/types";
 import { DraftWorkbench } from "./components/DraftWorkbench";
 import { ContentAttractionInsight } from "./components/ContentAttractionInsight";
 import { CollectionHistory } from "./components/CollectionHistory";
@@ -10,6 +10,7 @@ import { RankingTable } from "./components/RankingTable";
 import { NotesPreview } from "./components/NotesPreview";
 import { SampleImport } from "./components/SampleImport";
 import { XiaohongshuImport } from "./components/XiaohongshuImport";
+import { VerticalResearch } from "./components/VerticalResearch";
 import "./styles.css";
 
 export function App({ api }: { api: Api }) {
@@ -20,6 +21,7 @@ export function App({ api }: { api: Api }) {
   const [notes, setNotes] = useState<Note[]>([]);
   const [projects, setProjects] = useState<Project[]>([]);
   const [runs, setRuns] = useState<CollectionRun[]>([]);
+  const [verticalReport, setVerticalReport] = useState<VerticalResearchReport | null>(null);
   const [error, setError] = useState("");
 
   const guard = async (operation: () => Promise<void>) => {
@@ -51,6 +53,14 @@ export function App({ api }: { api: Api }) {
 
       {error && <div role="alert" className="error">{error}</div>}
       <div className="workflow">
+        <VerticalResearch report={verticalReport} onRun={async (topic) => guard(async () => {
+          let active = project;
+          if (!active) {
+            active = await api.createProject({ name: topic, description: `赛道研究：${topic}`, brand_profile: { name: topic, positioning: topic, target_audience: "待补充", tone: "专业友好", core_value: "内容引流", forbidden_terms: [] } });
+            setProject(active);
+          }
+          setVerticalReport(await api.runVerticalResearch(active.id, topic));
+        })} />
         <ProjectForm onCreate={async (input) => {
           const created = await api.createProject(input);
           setProject(created);

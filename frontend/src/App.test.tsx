@@ -101,6 +101,9 @@ const fakeApi: Api = {
         current_version: { id: "version-3", title: "泛红时别急着修护", body: "正文", tags: ["避坑"], cover_text: "先停再修" }
       }
     ];
+  },
+  async runVerticalResearch(_projectId, topic) {
+    return { topic, collection_date: "today", top_candidates: [{ title: "产后修复先做什么", url: "https://example.test/1", score: 90 }], ai_report: { today_summary: "低门槛修复动作受关注", hot_reasons: ["明确人群"], replication_checklist: ["写清痛点"], disclosure: "发布时间未公开" } };
   }
 };
 
@@ -120,6 +123,15 @@ describe("content research workbench", () => {
 
     expect(await screen.findByText("已导入 4 条公开笔记")).toBeInTheDocument();
     expect(await screen.findByText("Sensitive skin routine")).toBeInTheDocument();
+  });
+
+  it("runs vertical hot-content research from one topic input", async () => {
+    const user = userEvent.setup();
+    render(<App api={fakeApi} />);
+    await user.type(screen.getByLabelText("赛道关键词"), "普拉提产后修复");
+    await user.click(screen.getByRole("button", { name: "开始爆款研究" }));
+    expect(await screen.findByText(/今日爆款：低门槛修复动作受关注/)).toBeInTheDocument();
+    expect(screen.getByText("产后修复先做什么")).toBeInTheDocument();
   });
 
   it("reopens an existing project and shows its collection history", async () => {

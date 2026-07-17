@@ -41,5 +41,8 @@ export const api: Api = {
   },
   generateDrafts(topicId: string) {
     return request(`/topics/${topicId}/drafts/generate`, { method: "POST" });
+  },
+  runVerticalResearch(projectId: string, topic: string) {
+    return request(`/projects/${projectId}/analysis/research?topic=${encodeURIComponent(topic)}`, { method: "POST" });
   }
 };
