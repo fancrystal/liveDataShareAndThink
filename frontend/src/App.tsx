@@ -1,8 +1,10 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
-import type { Api, CollectionSummary, Draft, Note, Project, RankingReport } from "./api/types";
+import type { Api, CollectionRun, CollectionSummary, Draft, Note, Project, RankingReport } from "./api/types";
 import { DraftWorkbench } from "./components/DraftWorkbench";
 import { ContentAttractionInsight } from "./components/ContentAttractionInsight";
+import { CollectionHistory } from "./components/CollectionHistory";
+import { ProjectPicker } from "./components/ProjectPicker";
 import { ProjectForm } from "./components/ProjectForm";
 import { RankingTable } from "./components/RankingTable";
 import { NotesPreview } from "./components/NotesPreview";
@@ -16,6 +18,8 @@ export function App({ api }: { api: Api }) {
   const [report, setReport] = useState<RankingReport | null>(null);
   const [drafts, setDrafts] = useState<Draft[]>([]);
   const [notes, setNotes] = useState<Note[]>([]);
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [runs, setRuns] = useState<CollectionRun[]>([]);
   const [error, setError] = useState("");
 
   const guard = async (operation: () => Promise<void>) => {
@@ -26,6 +30,13 @@ export function App({ api }: { api: Api }) {
       setError(caught instanceof Error ? caught.message : "操作失败");
     }
   };
+
+  useEffect(() => { void api.listProjects().then(setProjects).catch(() => undefined); }, [api]);
+  const openProject = async (selected: Project) => guard(async () => {
+    setProject(selected); setSummary(null); setReport(null); setDrafts([]);
+    const [loadedNotes, loadedRuns] = await Promise.all([api.listNotes(selected.id), api.listCollectionRuns(selected.id)]);
+    setNotes(loadedNotes); setRuns(loadedRuns);
+  });
 
   return (
     <main>
@@ -43,8 +54,10 @@ export function App({ api }: { api: Api }) {
         <ProjectForm onCreate={async (input) => {
           const created = await api.createProject(input);
           setProject(created);
+          setProjects((items) => [created, ...items]);
           return created;
         }} />
+        <ProjectPicker projects={projects} onOpen={openProject} />
         <SampleImport
           enabled={Boolean(project)}
           summary={summary}
@@ -64,6 +77,7 @@ export function App({ api }: { api: Api }) {
           })}
         />
         <NotesPreview notes={notes} />
+        <CollectionHistory runs={runs} />
         <section className="panel action-panel">
           <div className="eyebrow">运行分析</div>
           <h2>从数据到判断</h2>

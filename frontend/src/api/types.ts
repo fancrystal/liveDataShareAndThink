@@ -18,6 +18,16 @@ export type CollectionSummary = {
   notes_created: number;
   metric_snapshots_created: number;
 };
+export type CollectionRun = {
+  id: string;
+  adapter: string;
+  query: string;
+  status: string;
+  started_at: string;
+  finished_at: string | null;
+  notes_created: number;
+  metric_snapshots_created: number;
+};
 export type MetricSnapshot = {
   id: string;
   collected_at: string;
@@ -82,9 +92,11 @@ export type Draft = {
 
 export interface Api {
   createProject(input: ProjectCreate): Promise<Project>;
+  listProjects(): Promise<Project[]>;
   importFixture(projectId: string): Promise<CollectionSummary>;
   importXiaohongshu(projectId: string, keyword: string): Promise<CollectionSummary>;
   listNotes(projectId: string): Promise<Note[]>;
+  listCollectionRuns(projectId: string): Promise<CollectionRun[]>;
   rankNotes(projectId: string): Promise<RankingReport>;
   createTopic(projectId: string, input: Record<string, string>): Promise<Topic>;
   generateDrafts(topicId: string): Promise<Draft[]>;

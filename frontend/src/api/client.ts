@@ -18,6 +18,9 @@ export const api: Api = {
   createProject(input: ProjectCreate) {
     return request("/projects", { method: "POST", body: JSON.stringify(input) });
   },
+  listProjects() {
+    return request("/projects");
+  },
   importFixture(projectId: string) {
     return request(`/projects/${projectId}/collections/fixture`, { method: "POST" });
   },
@@ -26,6 +29,9 @@ export const api: Api = {
   },
   listNotes(projectId: string) {
     return request(`/projects/${projectId}/notes`);
+  },
+  listCollectionRuns(projectId: string) {
+    return request(`/projects/${projectId}/collections`);
   },
   rankNotes(projectId: string) {
     return request(`/projects/${projectId}/analysis/rank`, { method: "POST" });

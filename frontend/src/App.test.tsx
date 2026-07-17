@@ -19,6 +19,9 @@ const fakeApi: Api = {
   async importFixture() {
     return { run_id: "run-1", status: "succeeded", notes_created: 3, metric_snapshots_created: 3 };
   },
+  async listProjects() {
+    return [];
+  },
   async importXiaohongshu() {
     return { run_id: "xhs-run", status: "succeeded", notes_created: 4, metric_snapshots_created: 4 };
   },
@@ -34,6 +37,9 @@ const fakeApi: Api = {
       author: { id: "author-1", nickname: "Creator", followers: null },
       metric_snapshots: [{ id: "metric-1", collected_at: "2026-07-14T08:00:00Z", likes: 12000, favorites: 300, comments: 8, shares: null, followers: null }]
     }];
+  },
+  async listCollectionRuns() {
+    return [];
   },
   async rankNotes() {
     return {
@@ -114,6 +120,27 @@ describe("content research workbench", () => {
 
     expect(await screen.findByText("已导入 4 条公开笔记")).toBeInTheDocument();
     expect(await screen.findByText("Sensitive skin routine")).toBeInTheDocument();
+  });
+
+  it("reopens an existing project and shows its collection history", async () => {
+    const api: Api = {
+      ...fakeApi,
+      listProjects: async () => [{
+        id: "existing-project", name: "已有项目", description: "历史数据", brand_profile: {
+          name: "品牌", positioning: "定位", target_audience: "用户", tone: "友好", core_value: "价值", forbidden_terms: []
+        }
+      }],
+      listCollectionRuns: async () => [{
+        id: "run-1", adapter: "xiaohongshu-dom", query: "敏感肌", status: "succeeded",
+        started_at: "2026-07-17T10:00:00Z", finished_at: "2026-07-17T10:01:00Z", notes_created: 20, metric_snapshots_created: 20
+      }]
+    };
+    const user = userEvent.setup();
+    render(<App api={api} />);
+
+    await user.click(await screen.findByRole("button", { name: "打开：已有项目" }));
+
+    expect(await screen.findByText("敏感肌 · 20 条")).toBeInTheDocument();
   });
 
   it("shows collection progress and prevents a duplicate Xiaohongshu import", async () => {
