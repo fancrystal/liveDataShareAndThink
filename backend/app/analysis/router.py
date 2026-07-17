@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.analysis.schemas import RankingReport
@@ -23,21 +23,33 @@ def run_vertical_research(
     source: str = "xiaohongshu",
     session: Session = Depends(get_session),
 ) -> dict:
-    if source != "fixture":
-        from app.collection.gateway_factory import build_xiaohongshu_gateway
-        from app.collection.xiaohongshu_dom_adapter import XiaohongshuDomAdapter
+    from app.collection.xiaohongshu_dom_adapter import XiaohongshuCollectionError
 
-        adapter = XiaohongshuDomAdapter(build_xiaohongshu_gateway(get_settings()))
-    else:
-        adapter = FixtureAdapter(get_settings().fixture_path)
-    collected = CollectionService(session, adapter).import_keyword(project_id, topic)
+    try:
+        if source != "fixture":
+            from app.collection.gateway_factory import build_xiaohongshu_gateway
+            from app.collection.xiaohongshu_dom_adapter import XiaohongshuDomAdapter
+
+            adapter = XiaohongshuDomAdapter(build_xiaohongshu_gateway(get_settings()))
+        else:
+            adapter = FixtureAdapter(get_settings().fixture_path)
+        collected = CollectionService(session, adapter).import_keyword(project_id, topic)
+    except XiaohongshuCollectionError as error:
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(error)) from error
+
     report = AnalysisService(session).rank(project_id)
     candidates = [{"title": item["title"], "url": item["url"], "score": item["score"]["total"]} for item in report["rankings"][:20]]
     settings = get_settings()
     if settings.deepseek_api_key:
         from app.analysis.deepseek_reporter import DeepSeekHotReporter
 
-        ai_report = DeepSeekHotReporter(settings.deepseek_api_key, settings.deepseek_model, settings.deepseek_base_url).analyze(topic, candidates)
+        try:
+            ai_report = DeepSeekHotReporter(settings.deepseek_api_key, settings.deepseek_model, settings.deepseek_base_url).analyze(topic, candidates)
+        except RuntimeError as error:
+            raise HTTPException(
+                status_code=status.HTTP_502_BAD_GATEWAY,
+                detail="DeepSeek 爆款分析失败，请检查 API Key、模型配置和网络后重试。",
+            ) from error
     else:
         ai_report = {"today_summary": "未配置 DeepSeek，以下为公开样本排名。", "hot_reasons": [], "replication_checklist": [], "disclosure": "发布时间未公开"}
     return {
@@ -58,4 +70,10 @@ def create_post_package(project_id: str, topic: str, angle: str, session: Sessio
     if not settings.deepseek_api_key:
         return {"title": angle or topic, "caption": "请配置 DeepSeek 后生成完整图文内容。", "tags": [topic], "pages": [{"heading": f"第 {index} 页", "body": angle or topic} for index in range(1, 6)]}
     from app.generation.post_packager import DeepSeekPostPackager
-    return DeepSeekPostPackager(settings.deepseek_api_key, settings.deepseek_model, settings.deepseek_base_url).create(topic, angle, evidence)
+    try:
+        return DeepSeekPostPackager(settings.deepseek_api_key, settings.deepseek_model, settings.deepseek_base_url).create(topic, angle, evidence)
+    except RuntimeError as error:
+        raise HTTPException(
+            status_code=status.HTTP_502_BAD_GATEWAY,
+            detail="DeepSeek 图文生成失败，请检查 API Key、模型配置和网络后重试。",
+        ) from error

@@ -135,6 +135,26 @@ describe("content research workbench", () => {
     expect(screen.getByText("产后修复先做什么")).toBeInTheDocument();
   });
 
+  it("shows progress and prevents duplicate vertical research while waiting", async () => {
+    let finishResearch: (() => void) | undefined;
+    const api: Api = {
+      ...fakeApi,
+      runVerticalResearch: (_projectId, topic) => new Promise((resolve) => {
+        finishResearch = () => resolve({ topic, collection_date: "today", top_candidates: [], ai_report: { today_summary: "分析完成", hot_reasons: [], replication_checklist: [], disclosure: "发布时间未公开" } });
+      })
+    };
+    const user = userEvent.setup();
+    render(<App api={api} />);
+
+    await user.type(screen.getByLabelText("赛道关键词"), "北京火锅");
+    await user.click(screen.getByRole("button", { name: "开始爆款研究" }));
+
+    expect(screen.getByRole("button", { name: "正在采集并分析…" })).toBeDisabled();
+    expect(screen.getByLabelText("赛道关键词")).toBeDisabled();
+    finishResearch?.();
+    expect(await screen.findByText(/今日爆款：分析完成/)).toBeInTheDocument();
+  });
+
   it("reopens an existing project and shows its collection history", async () => {
     const api: Api = {
       ...fakeApi,
