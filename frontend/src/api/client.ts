@@ -44,5 +44,8 @@ export const api: Api = {
   },
   runVerticalResearch(projectId: string, topic: string) {
     return request(`/projects/${projectId}/analysis/research?topic=${encodeURIComponent(topic)}`, { method: "POST" });
+  },
+  createPostPackage(projectId: string, topic: string, angle: string) {
+    return request(`/projects/${projectId}/analysis/post-package?topic=${encodeURIComponent(topic)}&angle=${encodeURIComponent(angle)}`, { method: "POST" });
   }
 };

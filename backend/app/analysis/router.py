@@ -48,3 +48,14 @@ def run_vertical_research(
         "analysis": report,
         "ai_report": ai_report,
     }
+
+
+@router.post("/post-package")
+def create_post_package(project_id: str, topic: str, angle: str, session: Session = Depends(get_session)) -> dict:
+    report = AnalysisService(session).rank(project_id)
+    evidence = [item["title"] for item in report["rankings"][:20]]
+    settings = get_settings()
+    if not settings.deepseek_api_key:
+        return {"title": angle or topic, "caption": "请配置 DeepSeek 后生成完整图文内容。", "tags": [topic], "pages": [{"heading": f"第 {index} 页", "body": angle or topic} for index in range(1, 6)]}
+    from app.generation.post_packager import DeepSeekPostPackager
+    return DeepSeekPostPackager(settings.deepseek_api_key, settings.deepseek_model, settings.deepseek_base_url).create(topic, angle, evidence)

@@ -104,7 +104,8 @@ const fakeApi: Api = {
   },
   async runVerticalResearch(_projectId, topic) {
     return { topic, collection_date: "today", top_candidates: [{ title: "产后修复先做什么", url: "https://example.test/1", score: 90 }], ai_report: { today_summary: "低门槛修复动作受关注", hot_reasons: ["明确人群"], replication_checklist: ["写清痛点"], disclosure: "发布时间未公开" } };
-  }
+  },
+  async createPostPackage() { return { title: "产后修复先做这一步", caption: "正文", tags: ["产后修复"], pages: Array.from({ length: 5 }, (_, index) => ({ heading: `第${index + 1}页`, body: "内容" })) }; }
 };
 
 describe("content research workbench", () => {
