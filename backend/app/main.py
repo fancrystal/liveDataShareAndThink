@@ -42,6 +42,14 @@ def create_app(database_url: str | None = None) -> FastAPI:
             "phase": "content-growth",
         }
 
+    @app.get("/api/collection-proxy/status")
+    def collection_proxy_status() -> dict[str, bool | str]:
+        configured = bool(settings.collection_proxy_url and settings.collection_proxy_token)
+        return {
+            "configured": configured,
+            "message": "Local collection proxy configured" if configured else "Local collection proxy needs configuration",
+        }
+
     return app
 
 

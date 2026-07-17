@@ -57,6 +57,14 @@ const fakeApi: Api = {
         summary: "识别高表现内容",
         confidence: "high",
         evidence: [{ id: "evidence-1", summary: "样本证据" }]
+      },
+      attraction_insight: {
+        id: "attraction-1",
+        title: "内容引流模式",
+        summary: "基于公开样本归纳可复用结构。",
+        confidence: "high",
+        result: { hook_patterns: { directive: 2 }, format_counts: { image: 2 }, reusable_angles: ["选题 A"] },
+        evidence: [{ id: "attraction-evidence-1", summary: "内容样本：敏感肌先做减法" }]
       }
     };
   },
@@ -145,5 +153,6 @@ describe("content research workbench", () => {
     await user.click(screen.getByRole("button", { name: "生成三个草稿" }));
     expect(await screen.findByText("敏感肌先做减法")).toBeInTheDocument();
     expect(screen.getByText("泛红时别急着修护")).toBeInTheDocument();
+    expect(screen.getByText("内容引流模式")).toBeInTheDocument();
   });
 });

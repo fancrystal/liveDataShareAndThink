@@ -2,6 +2,7 @@ import { useState } from "react";
 
 import type { Api, CollectionSummary, Draft, Note, Project, RankingReport } from "./api/types";
 import { DraftWorkbench } from "./components/DraftWorkbench";
+import { ContentAttractionInsight } from "./components/ContentAttractionInsight";
 import { ProjectForm } from "./components/ProjectForm";
 import { RankingTable } from "./components/RankingTable";
 import { NotesPreview } from "./components/NotesPreview";
@@ -86,6 +87,7 @@ export function App({ api }: { api: Api }) {
           })}>生成三个草稿</button>
         </section>
         <RankingTable report={report} />
+        <ContentAttractionInsight insight={report?.attraction_insight} />
         <DraftWorkbench drafts={drafts} />
       </div>
     </main>

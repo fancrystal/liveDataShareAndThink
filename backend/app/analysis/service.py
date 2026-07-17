@@ -5,6 +5,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.analysis.models import Evidence, Insight
+from app.analysis.patterns import ContentSample, derive_content_attraction_patterns
 from app.analysis.scoring import MetricInput, score_note, weighted_engagement
 from app.collection.models import MetricSnapshot, Note
 from app.projects.service import ProjectService
@@ -78,6 +79,45 @@ class AnalysisService:
             )
             self.session.add(evidence)
             evidence_rows.append(evidence)
+
+        patterns = derive_content_attraction_patterns(
+            [
+                ContentSample(
+                    note_id=item["note"].id,
+                    title=item["note"].title,
+                    content=item["note"].content,
+                    content_type=item["note"].content_type,
+                )
+                for item in ranked[:3]
+            ]
+        )
+        attraction_insight = Insight(
+            project_id=project_id,
+            type="content_attraction_patterns",
+            title="内容引流模式",
+            summary="基于当前公开样本归纳标题钩子、内容形式与可复用选题方向。",
+            confidence=confidence,
+            analysis_version="content-patterns-v1",
+            result={
+                "hook_patterns": patterns.hook_patterns,
+                "format_counts": patterns.format_counts,
+                "reusable_angles": list(patterns.reusable_angles),
+                "note_ids": list(patterns.note_ids),
+            },
+        )
+        self.session.add(attraction_insight)
+        self.session.flush()
+        attraction_evidence = []
+        for item in ranked[:3]:
+            evidence = Evidence(
+                insight_id=attraction_insight.id,
+                note_id=item["note"].id,
+                metric_snapshot_id=item["snapshot"].id,
+                summary=f"内容样本：{item['note'].title}",
+                contribution=item["score"].total,
+            )
+            self.session.add(evidence)
+            attraction_evidence.append(evidence)
         self.session.commit()
 
         return {
@@ -90,21 +130,27 @@ class AnalysisService:
                 }
                 for item in ranked
             ],
-            "insight": {
-                "id": insight.id,
-                "title": insight.title,
-                "summary": insight.summary,
-                "confidence": insight.confidence,
-                "analysis_version": insight.analysis_version,
-                "evidence": [
-                    {
-                        "id": row.id,
-                        "note_id": row.note_id,
-                        "metric_snapshot_id": row.metric_snapshot_id,
-                        "summary": row.summary,
-                        "contribution": row.contribution,
-                    }
-                    for row in evidence_rows
-                ],
-            },
+            "insight": self._insight_read(insight, evidence_rows),
+            "attraction_insight": self._insight_read(attraction_insight, attraction_evidence),
+        }
+
+    @staticmethod
+    def _insight_read(insight: Insight, evidence_rows: list[Evidence]) -> dict:
+        return {
+            "id": insight.id,
+            "title": insight.title,
+            "summary": insight.summary,
+            "confidence": insight.confidence,
+            "analysis_version": insight.analysis_version,
+            "result": insight.result,
+            "evidence": [
+                {
+                    "id": row.id,
+                    "note_id": row.note_id,
+                    "metric_snapshot_id": row.metric_snapshot_id,
+                    "summary": row.summary,
+                    "contribution": row.contribution,
+                }
+                for row in evidence_rows
+            ],
         }

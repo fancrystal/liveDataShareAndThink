@@ -100,3 +100,12 @@ class CollectionService:
         ProjectService(self.session).get(project_id)
         return list(self.session.scalars(select(Note).where(Note.project_id == project_id).order_by(Note.published_at)))
 
+    def list_runs(self, project_id: str) -> list[CollectionRun]:
+        ProjectService(self.session).get(project_id)
+        return list(
+            self.session.scalars(
+                select(CollectionRun)
+                .where(CollectionRun.project_id == project_id)
+                .order_by(CollectionRun.started_at.desc())
+            )
+        )

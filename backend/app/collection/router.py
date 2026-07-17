@@ -5,7 +5,7 @@ from app.collection.fixture_adapter import FixtureAdapter
 from app.collection.gateway_factory import build_xiaohongshu_gateway
 from app.collection.redbook_adapter import RedbookAdapter, RedbookAdapterError
 from app.collection.xiaohongshu_dom_adapter import XiaohongshuCollectionError, XiaohongshuDomAdapter
-from app.collection.schemas import CollectionSummary, NoteRead
+from app.collection.schemas import CollectionRunRead, CollectionSummary, NoteRead
 from app.collection.service import CollectionService
 from app.core.config import get_settings
 from app.db.session import get_session
@@ -57,3 +57,8 @@ def import_xiaohongshu(
 @router.get("/notes", response_model=list[NoteRead])
 def list_notes(project_id: str, session: Session = Depends(get_session)) -> list[NoteRead]:
     return fixture_service(session).list_notes(project_id)
+
+
+@router.get("/collections", response_model=list[CollectionRunRead])
+def list_collection_runs(project_id: str, session: Session = Depends(get_session)) -> list[CollectionRunRead]:
+    return fixture_service(session).list_runs(project_id)

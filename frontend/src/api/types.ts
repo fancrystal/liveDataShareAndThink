@@ -56,6 +56,14 @@ export type RankingReport = {
     confidence: string;
     evidence: { id: string; summary: string }[];
   };
+  attraction_insight: {
+    id: string;
+    title: string;
+    summary: string;
+    confidence: string;
+    result: { hook_patterns: Record<string, number>; format_counts: Record<string, number>; reusable_angles: string[] };
+    evidence: { id: string; summary: string }[];
+  };
 };
 export type Topic = { id: string };
 export type Draft = {

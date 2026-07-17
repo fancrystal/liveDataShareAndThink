@@ -32,9 +32,11 @@ class InsightRead(BaseModel):
     summary: str
     confidence: str
     analysis_version: str
+    result: dict
     evidence: list[EvidenceRead]
 
 
 class RankingReport(BaseModel):
     rankings: list[RankingRead]
     insight: InsightRead
+    attraction_insight: InsightRead

@@ -41,6 +41,18 @@ class CollectionSummary(BaseModel):
     metric_snapshots_created: int
 
 
+class CollectionRunRead(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    id: str
+    adapter: str
+    query: str
+    status: str
+    started_at: datetime
+    finished_at: datetime | None
+    notes_created: int
+    metric_snapshots_created: int
+
+
 class MetricSnapshotRead(BaseModel):
     model_config = ConfigDict(from_attributes=True)
     id: str

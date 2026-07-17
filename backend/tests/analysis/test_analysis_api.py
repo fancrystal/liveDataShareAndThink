@@ -7,3 +7,5 @@ def test_analysis_returns_ranked_notes_with_evidence(client, imported_project) -
     assert payload["rankings"][0]["score"]["total"] >= payload["rankings"][1]["score"]["total"]
     assert payload["insight"]["confidence"] in {"medium", "high"}
     assert len(payload["insight"]["evidence"]) == 3
+    assert payload["attraction_insight"]["result"]["format_counts"]
+    assert len(payload["attraction_insight"]["evidence"]) == 3
