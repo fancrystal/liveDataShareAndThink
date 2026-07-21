@@ -10,7 +10,7 @@ class DeepSeekPostPackager:
         self.api_key, self.model, self.base_url = api_key, model, base_url.rstrip("/")
         self.client = client or httpx.Client(timeout=60.0)
 
-    def create(self, topic: str, angle: str, evidence: list[str]) -> dict[str, Any]:
+    def create(self, topic: str, angle: str, evidence: list[Any]) -> dict[str, Any]:
         request = {"topic": topic, "angle": angle, "evidence": evidence, "required_json": ["title", "caption", "tags", "pages"]}
         messages = [
             {

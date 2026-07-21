@@ -45,6 +45,12 @@ button:disabled { opacity: .3; cursor: not-allowed; }
 .draft > span { color: #da4b37; text-transform: uppercase; font-size: 11px; }
 .draft h3 { font: 26px "DM Serif Display", serif; }
 .draft p { white-space: pre-line; color: #536158; line-height: 1.8; }
+.post-actions { display: flex; flex-wrap: wrap; gap: 10px; }
+.post-actions button { margin-top: 8px; }
+.poster-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; margin-top: 20px; }
+.poster-card { background: #e9eee9; padding: 12px; }
+.poster-card button { margin-top: 10px; }
+.poster-preview { display: block; width: 100%; height: auto; background: #f7f6f0; }
 .tags { display: flex; flex-wrap: wrap; gap: 8px; }
 .tags em { font-style: normal; font-size: 12px; }
 
@@ -52,4 +58,5 @@ button:disabled { opacity: .3; cursor: not-allowed; }
   header, .workflow { grid-template-columns: 1fr; }
   .lede, .span-two { grid-column: 1; }
   .draft-grid { grid-template-columns: 1fr; }
+  .poster-grid { grid-template-columns: 1fr; }
 }

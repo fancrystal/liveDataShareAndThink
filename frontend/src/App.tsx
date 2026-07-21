@@ -61,7 +61,7 @@ export function App({ api }: { api: Api }) {
             setProject(active);
           }
           setVerticalReport(await api.runVerticalResearch(active.id, topic));
-        })} onPackage={async (topic, angle) => guard(async () => { if (project) setPostPackage(await api.createPostPackage(project.id, topic, angle)); })} />
+        })} onPackage={async (topic, angle, runId) => guard(async () => { if (project) setPostPackage(await api.createPostPackage(project.id, topic, angle, runId)); })} />
         <ProjectForm onCreate={async (input) => {
           const created = await api.createProject(input);
           setProject(created);

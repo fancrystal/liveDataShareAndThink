@@ -30,6 +30,7 @@ export type CollectionRun = {
 };
 export type VerticalResearch = {
   topic: string;
+  run_id: string;
   collection_date: string;
   top_candidates: { title: string; url: string; score: number }[];
   ai_report: { today_summary: string; hot_reasons: string[]; replication_checklist: string[]; disclosure: string };
@@ -108,5 +109,5 @@ export interface Api {
   createTopic(projectId: string, input: Record<string, string>): Promise<Topic>;
   generateDrafts(topicId: string): Promise<Draft[]>;
   runVerticalResearch(projectId: string, topic: string): Promise<VerticalResearch>;
-  createPostPackage(projectId: string, topic: string, angle: string): Promise<PostPackage>;
+  createPostPackage(projectId: string, topic: string, angle: string, runId: string): Promise<PostPackage>;
 }

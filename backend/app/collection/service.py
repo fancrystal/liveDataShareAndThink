@@ -1,3 +1,5 @@
+from datetime import UTC
+
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
@@ -15,6 +17,7 @@ class CollectionService:
     def import_keyword(self, project_id: str, keyword: str) -> CollectionSummary:
         ProjectService(self.session).get(project_id)
         payload = self.adapter.search_notes(keyword)
+        collected_at = payload.collected_at.astimezone(UTC)
         run = CollectionRun(project_id=project_id, adapter=self.adapter.name, query=keyword)
         self.session.add(run)
         notes_created = 0
@@ -50,7 +53,7 @@ class CollectionService:
             source = {
                 "adapter": self.adapter.name,
                 "query": payload.query,
-                "collected_at": payload.collected_at.isoformat(),
+                "collected_at": collected_at.isoformat(),
             }
             if note is None:
                 note = Note(
@@ -64,20 +67,20 @@ class CollectionService:
                     published_at=item.published_at,
                     source=source,
                     raw_data=item.model_dump(mode="json"),
-                    first_collected_at=payload.collected_at,
-                    last_collected_at=payload.collected_at,
+                    first_collected_at=collected_at,
+                    last_collected_at=collected_at,
                 )
                 self.session.add(note)
                 self.session.flush()
                 notes_created += 1
             else:
-                note.last_collected_at = payload.collected_at
+                note.last_collected_at = collected_at
                 note.source = source
 
             self.session.add(
                 MetricSnapshot(
                     note_id=note.id,
-                    collected_at=payload.collected_at,
+                    collected_at=collected_at,
                     followers=item.author.followers,
                     **item.metrics.model_dump(),
                 )
@@ -85,7 +88,7 @@ class CollectionService:
             snapshots_created += 1
 
         run.status = "succeeded"
-        run.finished_at = payload.collected_at
+        run.finished_at = collected_at
         run.notes_created = notes_created
         run.metric_snapshots_created = snapshots_created
         self.session.commit()

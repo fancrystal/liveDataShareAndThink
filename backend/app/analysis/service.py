@@ -1,4 +1,4 @@
-from datetime import timezone
+from datetime import datetime, timezone
 from statistics import median
 
 from sqlalchemy import select
@@ -15,9 +15,21 @@ class AnalysisService:
     def __init__(self, session: Session) -> None:
         self.session = session
 
-    def rank(self, project_id: str) -> dict:
+    def rank(
+        self,
+        project_id: str,
+        source_query: str | None = None,
+        collected_at: datetime | None = None,
+    ) -> dict:
         ProjectService(self.session).get(project_id)
         notes = list(self.session.scalars(select(Note).where(Note.project_id == project_id)))
+        if source_query is not None and collected_at is not None:
+            notes = [
+                note
+                for note in notes
+                if note.source.get("query") == source_query
+                and self._same_collection_time(note.source.get("collected_at"), collected_at)
+            ]
         latest: list[tuple[Note, MetricSnapshot]] = [
             (note, note.metric_snapshots[-1]) for note in notes if note.metric_snapshots
         ]
@@ -127,12 +139,30 @@ class AnalysisService:
                     "title": item["note"].title,
                     "url": item["note"].url,
                     "score": item["score"].to_dict(),
+                    "content": item["note"].content,
+                    "metrics": {
+                        "likes": item["snapshot"].likes,
+                        "favorites": item["snapshot"].favorites,
+                        "comments": item["snapshot"].comments,
+                        "shares": item["snapshot"].shares,
+                    },
+                    "collected_at": item["snapshot"].collected_at.isoformat(),
                 }
                 for item in ranked
             ],
             "insight": self._insight_read(insight, evidence_rows),
             "attraction_insight": self._insight_read(attraction_insight, attraction_evidence),
         }
+
+    @staticmethod
+    def _same_collection_time(source_value: object, collected_at: datetime) -> bool:
+        if not isinstance(source_value, str):
+            return False
+        try:
+            source_time = datetime.fromisoformat(source_value.replace("Z", "+00:00"))
+        except ValueError:
+            return False
+        return source_time.replace(tzinfo=None) == collected_at.replace(tzinfo=None)
 
     @staticmethod
     def _insight_read(insight: Insight, evidence_rows: list[Evidence]) -> dict:

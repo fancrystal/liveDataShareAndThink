@@ -103,7 +103,7 @@ const fakeApi: Api = {
     ];
   },
   async runVerticalResearch(_projectId, topic) {
-    return { topic, collection_date: "today", top_candidates: [{ title: "产后修复先做什么", url: "https://example.test/1", score: 90 }], ai_report: { today_summary: "低门槛修复动作受关注", hot_reasons: ["明确人群"], replication_checklist: ["写清痛点"], disclosure: "发布时间未公开" } };
+    return { topic, run_id: "run-vertical-1", collection_date: "today", top_candidates: [{ title: "产后修复先做什么", url: "https://example.test/1", score: 90 }], ai_report: { today_summary: "低门槛修复动作受关注", hot_reasons: ["明确人群"], replication_checklist: ["写清痛点"], disclosure: "发布时间未公开" } };
   },
   async createPostPackage() { return { title: "产后修复先做这一步", caption: "正文", tags: ["产后修复"], pages: Array.from({ length: 5 }, (_, index) => ({ heading: `第${index + 1}页`, body: "内容" })) }; }
 };
@@ -135,12 +135,26 @@ describe("content research workbench", () => {
     expect(screen.getByText("产后修复先做什么")).toBeInTheDocument();
   });
 
+  it("provides download and copy controls for a generated five-page post", async () => {
+    const user = userEvent.setup();
+    render(<App api={fakeApi} />);
+
+    await user.type(screen.getByLabelText("赛道关键词"), "北京火锅");
+    await user.click(screen.getByRole("button", { name: "开始爆款研究" }));
+    await user.type(await screen.findByLabelText("创作方向"), "探店");
+    await user.click(screen.getByRole("button", { name: "生成可发布图文" }));
+
+    expect(await screen.findByRole("button", { name: "下载全部海报" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "下载第 1 张海报" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "复制正文和标签" })).toBeInTheDocument();
+  });
+
   it("shows progress and prevents duplicate vertical research while waiting", async () => {
     let finishResearch: (() => void) | undefined;
     const api: Api = {
       ...fakeApi,
       runVerticalResearch: (_projectId, topic) => new Promise((resolve) => {
-        finishResearch = () => resolve({ topic, collection_date: "today", top_candidates: [], ai_report: { today_summary: "分析完成", hot_reasons: [], replication_checklist: [], disclosure: "发布时间未公开" } });
+        finishResearch = () => resolve({ topic, run_id: "run-vertical-2", collection_date: "today", top_candidates: [], ai_report: { today_summary: "分析完成", hot_reasons: [], replication_checklist: [], disclosure: "发布时间未公开" } });
       })
     };
     const user = userEvent.setup();

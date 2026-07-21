@@ -7,6 +7,7 @@ def test_vertical_research_collects_and_returns_top_candidates(client, project, 
     assert response.status_code == 201
     payload = response.json()
     assert payload["topic"] == "普拉提产后修复"
+    assert payload["run_id"]
     assert payload["collected"]["notes_created"] == 3
     assert len(payload["top_candidates"]) == 3
     assert payload["collection_date"]
